@@ -18,9 +18,9 @@ logger = logging.getLogger(__name__)
 #: The property it buys, stated so the value can be re-derived rather than
 #: taken on trust: a day D is asked for again on every run from D through
 #: D+INCREMENTAL_OVERLAP_DAYS, so the overlap tolerates a publication lag of
-#: up to that many days. Measured 19 Aug 2026, the lag is at least one -
-#: `daily-*` summaries for that day were absent from a sync run late in the
-#: local day and present the next morning - and three is margin on top.
+#: up to that many days. The lag is at least one day: a `daily-*` summary was
+#: absent from a sync run late in its own local day and present the next
+#: morning. Three is margin on top.
 #:
 #: A host being off needs none of this: `last_date_attempted` is written only
 #: on success, so the cursor does not advance while nothing runs and the first
@@ -125,11 +125,12 @@ def _run_sync_types(conn, data_types, results, since_date, until_date, today, da
                 ]
                 if candidates:
                     # Behind the cursor, not at it. Google publishes a day's
-                    # `daily-*` summary after the day has ended, so a sync
-                    # running late in the local day gets nothing for
-                    # yesterday, records that it attempted through today, and
-                    # resuming from that cursor would never ask again - a
-                    # permanent one-day hole behind a sync_log full of `ok`.
+                    # `daily-*` summary after the day has ended, so a run early
+                    # on the next day can still find nothing for yesterday,
+                    # and records that it attempted through today. Resuming
+                    # from that cursor would never ask for yesterday again,
+                    # leaving a permanent one-day hole behind a sync_log full
+                    # of `ok`.
                     # Never subtract past date.min: a cursor within the
                     # overlap of it - which only a corrupt sync_log produces -
                     # would raise OverflowError instead of syncing.

@@ -72,9 +72,9 @@ class TestIdentity:
     def test_a_day_an_earlier_provider_recorded_is_left_to_it(self, tmp_db, sync):
         """The two id spaces cannot collide, so the same session lands twice.
 
-        Nothing stored can tell that it is the same session either: keying on
-        (start_time, duration, name) collides across the Strava mirrors of
-        watch-tracked workouts, so deduping on it would delete real rows.
+        Nothing stored can tell that it is the same session either: workouts
+        mirrored from another service collide on (start_time, duration, name),
+        so deduping on it would delete real rows.
         Days another provider already covered are therefore skipped.
         """
         db.save_exercise(tmp_db, "1234567", {"date": "2026-03-15", "name": "Ride", "calories": 90})

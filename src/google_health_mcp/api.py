@@ -9,8 +9,8 @@ that succeeds while every page parses to nothing.
 
 Quotas are per user: 300 requests a minute for a verified app, and 2.5 a
 second for an unverified one - which is every install of this, since the
-100-user cap makes verification unnecessary. Measured against that: a full
-three-year backfill of every type is around 250 requests.
+100-user cap makes verification unnecessary. Measured against that: a
+multi-year backfill of every type is around 250 requests.
 """
 
 import http.client
@@ -126,7 +126,7 @@ GOOGLE_SESSION_PAGE_SIZE = 25
 
 #: A page loop with no ceiling hangs the thread serving a tool call if the
 #: server keeps handing back tokens. Generous enough that no real window
-#: reaches it: three years of intraday points at the maximum page size.
+#: reaches it: several years of intraday points at the maximum page size.
 GOOGLE_MAX_PAGES = 500
 
 #: The page count alone does not bound the wall clock - 500 requests at the
@@ -391,9 +391,9 @@ class GoogleGatewayTimeout(HealthAPIError):
 def list_google_data_points(data_type: str, start: date, end: date) -> list[dict]:
     """Every data point of one type in [start, end), following pages to exhaustion.
 
-    An empty page carrying a `nextPageToken` is not an empty window: measured
-    against the real API, a month of steps returned nothing on its first page
-    and 6025 points behind it. Only an absent or empty token ends the walk.
+    An empty page carrying a `nextPageToken` is not an empty window: Google
+    can answer a first page with no points and hold them on the pages behind
+    it. Only an absent or empty token ends the walk.
 
     Resuming *across runs* re-issues a narrowed request rather than storing a
     token: one may only be replayed with every other field unchanged, and it

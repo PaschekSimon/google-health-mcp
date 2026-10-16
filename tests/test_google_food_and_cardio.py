@@ -1,12 +1,11 @@
 """food_log and cardio_fitness, the two tables with a daily value and no session.
 
-Neither type returns data on the account these were built against, so the field
-names come from the published schemas rather than from a reading. What can be
-pinned without live data is where each value lands: cardio fitness keeps a
-reported band and a single value in separate columns, because one number
-written into both ends of the band would quietly destroy it, and food log is
-assembled from two independent sources that must not blank each other on a day
-only one of them reports.
+Neither type has been exercised against a live reading, so the field names
+come from the published schemas. What can be pinned without live data is where
+each value lands: cardio fitness keeps a reported band and a single value in
+separate columns, because one number written into both ends of the band would
+quietly destroy it, and food log is assembled from two independent sources
+that must not blank each other on a day only one of them reports.
 """
 
 from datetime import date

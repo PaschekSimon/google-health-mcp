@@ -77,7 +77,7 @@ class TestTheSourcesMerge:
         assert row["floors"] is None
 
     def test_calories_never_come_from_adding_active_and_basal(self, tmp_db, sync_activity):
-        """basal-energy-burned returns nothing on a real account.
+        """basal-energy-burned can return nothing at all for an account.
 
         Summing active and basal would produce a day's figure missing the part
         that is most of it, and look plausible. total-calories is the source.
@@ -171,10 +171,10 @@ class TestTheThreeStatesOfARollup:
 class TestTheMinuteColumnsAreNotWritten:
     """No reading of activity-level reproduces the five minute columns.
 
-    Measured on one real day: the raw list returns 1565 minute-long segments
-    for a 1440-minute day, because it is the per-source view and the sources
-    overlap; reconciled it returns 591, under ten hours of coverage. The type
-    has no daily rollup, so nothing left carries Google's own reconciliation.
+    The raw list returns more minute-long segments than the day has minutes,
+    because it is the per-source view and the sources overlap; reconciled, it
+    covers well under the day. The type has no daily rollup, so nothing left
+    carries Google's own reconciliation.
     """
 
     def test_a_google_sync_leaves_them_null(self, tmp_db, sync_activity):
@@ -191,7 +191,7 @@ class TestTheMinuteColumnsAreNotWritten:
             assert row[column] is None, column
 
     def test_an_imported_row_keeps_its_own(self, tmp_db, sync_activity):
-        """Leaving them unwritten is what preserves three years of them."""
+        """Leaving them unwritten is what preserves an imported history of them."""
         db.save_activity(
             tmp_db,
             {"date": "2026-03-15", "very_active_minutes": 45, "sedentary_minutes": 761},

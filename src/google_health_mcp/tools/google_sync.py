@@ -318,23 +318,22 @@ def sync_activity(conn, start, end) -> int:
     columns this writer does not name.
 
     `calories_out` comes from `total-calories` and never from adding active
-    and basal energy: basal returns nothing at all on a real account, so that
+    and basal energy: basal can return nothing at all for an account, so that
     sum would silently drop the larger half of the number.
 
     **The five minute columns are deliberately not written**, `active_minutes`
     among them: it was a derivation of two of the other four, so it goes with
-    them. Google's
-    `activity-level` vocabulary matches them exactly, which is what made it
-    look straightforward, but no reading of it tiles a day. Measured on one
-    real day: listed raw it returns 1565 minute-long segments for a
-    1440-minute day, because `list` is the per-source view and the sources
-    overlap; reconciled it returns 591, which covers under ten hours. The type
-    has no daily rollup - the API says so plainly, whatever the discovery
-    document's value union implies - so there is nothing left that carries
-    Google's own reconciliation. De-duplicating the raw stream ourselves would
-    mean inventing a precedence rule between sources and presenting it as
-    Google's number, and deriving sedentary as the day minus the rest would
-    rest on the four levels partitioning a day, which they measurably do not.
+    them. Google's `activity-level` vocabulary matches them exactly, which is
+    what made it look straightforward, but no reading of it tiles a day. The
+    raw list returns more minute-long segments than the day has minutes,
+    because `list` is the per-source view and the sources overlap; reconciled,
+    it covers well under the day. The type has no daily rollup - the API says
+    so plainly, whatever the discovery document's value union implies - so
+    there is nothing left that carries Google's own reconciliation.
+    De-duplicating the raw stream ourselves would mean inventing a precedence
+    rule between sources and presenting it as Google's number, and deriving
+    sedentary as the day minus the rest would rest on the four levels
+    partitioning a day, which they measurably do not.
 
     So they stay NULL, as `sleep.efficiency` and `weight.bmi` already do, and
     an imported row's values beside them are left untouched.
@@ -671,9 +670,9 @@ def _days_another_provider_recorded(conn) -> set[str]:
     Google keys a workout by a resource name, so the same session arrives
     under a key that inserts rather than corrects - and a backfill over an
     imported history would hold every workout twice. Nothing stored can tell
-    the pair apart either: (start_time, duration, name) collides across the
-    Strava mirrors of watch-tracked workouts, measured on real data, so
-    deduping on it would delete rows that are genuinely distinct.
+    the pair apart either: workouts mirrored from another service collide on
+    (start_time, duration, name), so deduping on it would delete rows that are
+    genuinely distinct.
 
     Per day rather than a cut-off date, so a day the earlier provider never
     recorded is still filled. A day this provider wrote is not in the set, so
@@ -804,9 +803,8 @@ def sync_ecg(conn, start, end) -> int:
 def sync_irn(conn, start, end) -> int:
     """Irregular-rhythm notifications.
 
-    The only mapping here never checked against real data: the account this
-    was built against has never had an alert, so the shape follows the
-    published schema alone.
+    Not exercised against a real alert, so the shape follows the published
+    schema alone.
     """
     count = 0
     for point in api.list_google_data_points("irregular-rhythm-notification", *_window(start, end)):
@@ -844,9 +842,8 @@ def sync_cardio_fitness(conn, start, end) -> int:
     both ends would collapse a real four-wide range to a point and store the
     difference between two definitions as though it were a measurement.
 
-    Unverified against live data: this type returns nothing on the account the
-    normalisers were built against, so the field name follows `DailyVO2Max` in
-    the discovery document rather than a reading.
+    Not exercised against a live reading, so the field name follows
+    `DailyVO2Max` in the discovery document.
     """
     count = 0
     for row in _daily_rows(

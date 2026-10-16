@@ -1366,18 +1366,17 @@ class TestASeriesThatHasStopped:
         assert not [f for f in findings if "hrv" in f.detail]
 
     def test_the_longest_normal_gap_is_not_reported(self, setup_paths):
-        """The pattern that decides the window, and it is measured, not chosen.
+        """The pattern that decides the window.
 
-        The longest gap in the last 400 days of a real cache is eleven days,
-        in skin temperature and SpO2. A recent window a normal gap can fill
-        would report a fault every time one happened, and a check that cries
-        wolf is one nobody reads - so the fixture is that measured gap rather
-        than a comfortable one, which is what makes it defend the constant.
+        A recent window a normal gap can fill would report a fault every time
+        one happened, and a check that cries wolf is one nobody reads. So the
+        fixture is a gap shorter than the window, and a window no wider than
+        the gap fails here.
         """
         _config_dir, db_path = setup_paths
         db_path.parent.mkdir(parents=True)
         conn = db.get_db(db_path)
-        # Dense for a month, then the measured eleven-day gap, cache carrying on.
+        # Dense for a month, then an eleven-day gap, cache carrying on.
         self._fill(conn, "skin_temperature", self._days(0, 39), nightly_relative=0.4)
         self._fill(conn, "sleep", self._days(0, 50), total_minutes=420)
         conn.commit()

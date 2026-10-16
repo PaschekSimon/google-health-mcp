@@ -66,8 +66,8 @@ class TestWeight:
         assert rows[0]["fat_pct"] == 18.5
 
     def test_bmi_is_never_written(self, tmp_db, sync):
-        """No Google source. A derived BMI beside three years of reported ones
-        is a residual built from estimates, inside a column."""
+        """No Google source. A derived BMI beside an imported history of
+        reported ones is a residual built from estimates, inside a column."""
         db.save_weight(tmp_db, {"date": "2026-03-15", "bmi": 25.0})
         tmp_db.commit()
         sync(google_sync.sync_weight, {"weight": [_sample("weight", {"weightGrams": 72762})]})

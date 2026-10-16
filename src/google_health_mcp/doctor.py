@@ -702,14 +702,11 @@ def _newest_per_type(conn: sqlite3.Connection) -> dict[str, str]:
 #: `_check_freshness`: a whole cache going stale is that check's job, and one
 #: type dying while the rest continue is this one's.
 #: Fourteen because a multi-day gap is a real pattern, not a fault, and a
-#: window a normal gap can fill is a check people learn to ignore. Measured
-#: over a real three-year cache: the longest gap in the last 400 days is 11
-#: days (skin temperature and SpO2), so fourteen carries a three-day margin.
-#: Weight's longest is 12, retained only as corroboration: it is excluded
-#: below, so its gaps can never reach this check. Older history
-#: on the same account holds 19 and 20-day gaps in HRV and breathing rate,
-#: which this window would have reported; that is the accepted cost of
-#: detecting a real stop within a fortnight rather than a month.
+#: window a normal gap can fill is a check people learn to ignore. It sits a
+#: few days above the longest gap observed in a year of a worn device's data.
+#: An occasional longer gap in one series exceeds it and is reported; that is
+#: the accepted cost of detecting a real stop within a fortnight rather than a
+#: month.
 _STOPPED_RECENT_DAYS = 14
 _STOPPED_PRIOR_DAYS = 30
 #: What makes a series established enough to judge. Density, not age, is what
@@ -721,15 +718,15 @@ _ESTABLISHED_DAYS = 15
 #: Types a person fills by hand rather than a device filling them. Density
 #: tells a stopped machine series from a sporadic one, but for these it
 #: measures a habit, and a habit ending is not a fault - a month of logged
-#: runs followed by a month off would otherwise be reported. Measured: on a
-#: real account `exercises` has rows on 483 of 1042 days, easily dense enough
-#: to be judged. Naming them means adding a type forces the decision.
+#: runs followed by a month off would otherwise be reported. Someone who logs a
+#: workout on most days clears the density guard, so density alone does not
+#: protect these. Naming them means adding a type forces the decision.
 #:
-#: `weight` is the arguable one and the trade is deliberate: at 65% density on
-#: a real account it is a smart scale rather than hand entry, and the density
-#: guard alone already protects a sporadic weigher. What the exclusion buys is
-#: the daily weigher who goes on holiday; what it costs is that a broken
-#: weight sync is invisible here. The false positive was judged worse.
+#: `weight` is the arguable one and the trade is deliberate: a connected scale
+#: fills it more like a device than by hand, and the density guard alone
+#: already protects a sporadic weigher. What the exclusion buys is the daily
+#: weigher who goes on holiday; what it costs is that a broken weight sync is
+#: invisible here. The false positive was judged worse.
 #:
 #: `exercise_routes` follows `exercises`, one route per GPS workout, and
 #: `height` is logged a handful of times in a lifetime. `weight_readings` and

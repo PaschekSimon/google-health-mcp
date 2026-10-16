@@ -153,9 +153,9 @@ class TestChunking:
     def test_a_day_with_no_rollup_point_is_absent_rather_than_zero(self):
         """Absence is not zero, and the client must not decide which it is.
 
-        A rollup covering fourteen days returned twelve points on real data.
-        Whether the two missing days are off-wrist or genuinely nothing is a
-        question for whatever writes them, not for the fetch.
+        A rollup can return fewer points than the days it covers. Whether the
+        missing days are off-wrist or genuinely nothing is a question for
+        whatever writes them, not for the fetch.
         """
         with patch(
             "urllib.request.urlopen",

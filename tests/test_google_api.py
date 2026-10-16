@@ -76,9 +76,9 @@ def _requested_urls(mock):
 
 class TestPagingToExhaustion:
     def test_an_empty_page_carrying_a_token_is_not_the_end(self):
-        """Measured against the real API: a month of steps returned an empty
-        first page with a token, and 6025 points behind it. Any loop that
-        concludes "no data" from one response reports a gap that is not there.
+        """Google can answer a first page with no points and a token, holding
+        the points on the pages behind it. Any loop that concludes "no data"
+        from one response reports a gap that is not there.
         """
         pages = [
             _page([], token="t1"),

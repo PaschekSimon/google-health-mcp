@@ -536,12 +536,11 @@ def test_auto_sync_closes_its_connection_even_when_the_lookup_fails(tmp_path, mo
 class TestTheIncrementalWindowLooksBack:
     """Google publishes a day's summary after the day has ended.
 
-    A sync running late in the local day therefore sees nothing for
-    yesterday, records that it attempted through today, and - resuming from
-    that cursor - never asks for yesterday again. Measured on a real cache:
-    resting heart rate, breathing rate, skin temperature and SpO2 all had no
-    19 Aug 2026 row while Google held one for each, and nothing anywhere
-    said so. `sync_log` was full of `ok`, so `doctor` reported a clean log.
+    A sync running before that summary is out, early on the next day, finds
+    nothing for yesterday and records that it attempted through today, and
+    resuming from that cursor never asks for yesterday again. That day's
+    `daily-*` rows stay missing and nothing reports it: `sync_log` holds only
+    `ok`, so `doctor` sees a clean log.
     """
 
     def test_a_day_the_cursor_has_passed_is_asked_for_again(self, tmp_db, monkeypatch):
