@@ -1,7 +1,10 @@
 """Sync tool: fetch data from the Google Health API and store it in the cache."""
 
 import logging
+import subprocess
+import sys
 from datetime import date, timedelta
+from pathlib import Path
 
 import anyio
 
@@ -210,6 +213,24 @@ def _run_sync_types(conn, data_types, results, since_date, until_date, today, da
     return results
 
 
+#: Simon's intraday sync (Desktop\Health\health_sync.py), started on every
+#: health question. The launcher returns at once and skips the run if one
+#: finished recently, so this costs one short-lived process.
+ON_ACCESS_LAUNCHER = Path.home() / "Desktop" / "Health" / "sync_on_access.py"
+
+
+def start_on_access_sync() -> None:
+    if not ON_ACCESS_LAUNCHER.is_file():
+        return
+    try:
+        subprocess.Popen(
+            [str(Path(sys.executable).with_name("pythonw.exe")), "-I", str(ON_ACCESS_LAUNCHER)],
+            cwd=ON_ACCESS_LAUNCHER.parent, creationflags=subprocess.CREATE_NO_WINDOW,
+            stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    except Exception as e:
+        logger.debug("On-access sync launcher failed: %s", type(e).__name__)
+
+
 def auto_sync_if_stale(data_type: str) -> None:
     """Sync data_type if it has never been synced or last sync was before today.
 
@@ -220,6 +241,8 @@ def auto_sync_if_stale(data_type: str) -> None:
     """
     if config.OFFLINE_MODE:
         return
+
+    start_on_access_sync()
 
     try:
         conn = db.get_db()
